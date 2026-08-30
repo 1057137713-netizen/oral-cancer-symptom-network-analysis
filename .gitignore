@@ -1,0 +1,27 @@
+# Participant-level clinical data
+data/raw_data.xlsx
+data/*.xlsx
+data/*.xls
+data/*.csv
+
+# R workspace / history files
+.RData
+.Rhistory
+.Ruserdata
+
+# RStudio project files
+.Rproj.user/
+*.Rproj
+
+# Temporary files
+*.tmp
+*.temp
+~$*
+
+# OS-generated files
+.DS_Store
+Thumbs.db
+
+# Local backups
+*.bak
+*.backup
