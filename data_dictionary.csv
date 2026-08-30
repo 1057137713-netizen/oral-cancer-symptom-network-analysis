@@ -1,0 +1,28 @@
+Variable,Type,Coding_or_range,Description,Analysis_use
+NO,Integer,1-508,Participant sequence number,Administrative identifier only; not used in statistical analysis
+sex,Categorical,1 = Male; 2 = Female,Sex,Used for subgroup network analysis and Network Comparison Test
+site,Categorical,1 = Oral cavity proper; 2 = Oral vestibule,Anatomical site,Used for subgroup network analysis and Network Comparison Test
+way,Categorical,1 = Radiotherapy alone; 2 = Radiotherapy plus other treatments,Treatment modality,Used for subgroup network analysis and Network Comparison Test
+Q1,Numeric,0-10,Pain,Used in continuous GGM; dichotomized for Ising/NIRA as 0 = absent and >0 = present
+Q2,Numeric,0-10,Fatigue,Used in continuous GGM; dichotomized for Ising/NIRA as 0 = absent and >0 = present
+Q3,Numeric,0-10,Nausea,Used in continuous GGM; dichotomized for Ising/NIRA as 0 = absent and >0 = present
+Q4,Numeric,0-10,Disturbed sleep,Used in continuous GGM; dichotomized for Ising/NIRA as 0 = absent and >0 = present
+Q5,Numeric,0-10,Distress,Used in continuous GGM; dichotomized for Ising/NIRA as 0 = absent and >0 = present
+Q6,Numeric,0-10,Shortness of breath,Used in continuous GGM; dichotomized for Ising/NIRA as 0 = absent and >0 = present
+Q7,Numeric,0-10,Forgetfulness,Used in continuous GGM; dichotomized for Ising/NIRA as 0 = absent and >0 = present
+Q8,Numeric,0-10,Lack of appetite,Used in continuous GGM; dichotomized for Ising/NIRA as 0 = absent and >0 = present
+Q9,Numeric,0-10,Drowsiness,Used in continuous GGM; dichotomized for Ising/NIRA as 0 = absent and >0 = present
+Q10,Numeric,0-10,Dry mouth,Used in continuous GGM; dichotomized for Ising/NIRA as 0 = absent and >0 = present
+Q11,Numeric,0-10,Sadness,Used in continuous GGM; dichotomized for Ising/NIRA as 0 = absent and >0 = present
+Q12,Numeric,0-10,Vomiting,Used in continuous GGM; dichotomized for Ising/NIRA as 0 = absent and >0 = present
+Q13,Numeric,0-10,Numbness or tingling,Used in continuous GGM; dichotomized for Ising/NIRA as 0 = absent and >0 = present
+Q14,Numeric,0-10,Mouth or throat mucus,Used in continuous GGM; dichotomized for Ising/NIRA as 0 = absent and >0 = present
+Q15,Numeric,0-10,Difficulty swallowing or chewing,Used in continuous GGM; dichotomized for Ising/NIRA as 0 = absent and >0 = present
+Q16,Numeric,0-10,Choking,Used in continuous GGM; dichotomized for Ising/NIRA as 0 = absent and >0 = present
+Q17,Numeric,0-10,Difficulty speaking,Used in continuous GGM; dichotomized for Ising/NIRA as 0 = absent and >0 = present
+Q18,Numeric,0-10,Skin pain,Used in continuous GGM; dichotomized for Ising/NIRA as 0 = absent and >0 = present
+Q19,Numeric,0-10,Constipation,Used in continuous GGM; dichotomized for Ising/NIRA as 0 = absent and >0 = present
+Q20,Numeric,0-10,Taste changes,Used in continuous GGM; dichotomized for Ising/NIRA as 0 = absent and >0 = present
+Q21,Numeric,0-10,Mouth or throat soreness,Used in continuous GGM; dichotomized for Ising/NIRA as 0 = absent and >0 = present
+Q22,Numeric,0-10,Teeth or gum problems,Used in continuous GGM; dichotomized for Ising/NIRA as 0 = absent and >0 = present
+×Ü·Ö,Numeric,0-220,Sum of Q1-Q22 symptom scores,Descriptive variable; not used as a node in network estimation
