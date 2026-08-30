@@ -1,0 +1,347 @@
+############################################################
+# 04_bridge_strength_sensitivity.R
+#
+# Sensitivity analysis of bridge strength
+#
+# Comparison:
+# - Retained four-factor symptom structure
+# - Alternative two-factor symptom structure
+#
+# The same GGM estimated in 03_GGM_network_analysis.R
+# is used for both community assignments.
+############################################################
+
+
+##############################
+# 1. Load packages
+##############################
+
+library(networktools)
+library(openxlsx)
+library(ggplot2)
+library(dplyr)
+
+
+##############################
+# 2. File paths
+##############################
+
+input_path <- "results/03_GGM_network_analysis/GGM_network_objects.RData"
+
+output_path <- "results/04_bridge_strength_sensitivity"
+
+if (!dir.exists(output_path)) {
+  dir.create(output_path, recursive = TRUE)
+}
+
+
+##############################
+# 3. Load GGM object
+##############################
+
+if (!file.exists(input_path)) {
+  stop(
+    paste0(
+      "Required GGM object not found: ",
+      input_path,
+      "\nPlease run scripts/03_GGM_network_analysis.R first."
+    )
+  )
+}
+
+load(input_path)
+
+if (!exists("adj_matrix")) {
+  stop("Object 'adj_matrix' was not found in the GGM results file.")
+}
+
+symptom_vars <- paste0("Q", 1:22)
+
+rownames(adj_matrix) <- symptom_vars
+colnames(adj_matrix) <- symptom_vars
+
+
+##############################
+# 4. Four-factor communities
+##############################
+
+# Retained four-factor solution:
+#
+# Cluster 1:
+# Q15, Q16
+#
+# Cluster 2:
+# Q2, Q4, Q5, Q6, Q7, Q9, Q11, Q19
+#
+# Cluster 3:
+# Q1, Q8, Q10, Q13, Q14, Q17, Q18, Q20, Q21, Q22
+#
+# Cluster 4:
+# Q3, Q12
+
+community4 <- c(
+  3, # Q1
+  2, # Q2
+  4, # Q3
+  2, # Q4
+  2, # Q5
+  2, # Q6
+  2, # Q7
+  3, # Q8
+  2, # Q9
+  3, # Q10
+  2, # Q11
+  4, # Q12
+  3, # Q13
+  3, # Q14
+  1, # Q15
+  1, # Q16
+  3, # Q17
+  3, # Q18
+  2, # Q19
+  3, # Q20
+  3, # Q21
+  3  # Q22
+)
+
+names(community4) <- symptom_vars
+
+
+##############################
+# 5. Two-factor communities
+##############################
+
+# Alternative two-factor solution:
+#
+# Factor 1:
+# Q1, Q8, Q10, Q13, Q14, Q17, Q18, Q20, Q21, Q22
+#
+# Factor 2:
+# Q2, Q3, Q4, Q5, Q6, Q7, Q9, Q11,
+# Q12, Q15, Q16, Q19
+
+community2 <- c(
+  1, # Q1
+  2, # Q2
+  2, # Q3
+  2, # Q4
+  2, # Q5
+  2, # Q6
+  2, # Q7
+  1, # Q8
+  2, # Q9
+  1, # Q10
+  2, # Q11
+  2, # Q12
+  1, # Q13
+  1, # Q14
+  2, # Q15
+  2, # Q16
+  1, # Q17
+  1, # Q18
+  2, # Q19
+  1, # Q20
+  1, # Q21
+  1  # Q22
+)
+
+names(community2) <- symptom_vars
+
+
+##############################
+# 6. Calculate bridge strength
+##############################
+
+bridge4 <- networktools::bridge(
+  adj_matrix,
+  communities = community4
+)
+
+bridge2 <- networktools::bridge(
+  adj_matrix,
+  communities = community2
+)
+
+
+##############################
+# 7. Extract four-factor results
+##############################
+
+result4 <- data.frame(
+  Symptom = names(
+    bridge4$`Bridge Strength`
+  ),
+  Bridge_strength_4factor = as.numeric(
+    bridge4$`Bridge Strength`
+  )
+)
+
+result4$Rank_4factor <- rank(
+  -result4$Bridge_strength_4factor,
+  ties.method = "min"
+)
+
+
+##############################
+# 8. Extract two-factor results
+##############################
+
+result2 <- data.frame(
+  Symptom = names(
+    bridge2$`Bridge Strength`
+  ),
+  Bridge_strength_2factor = as.numeric(
+    bridge2$`Bridge Strength`
+  )
+)
+
+result2$Rank_2factor <- rank(
+  -result2$Bridge_strength_2factor,
+  ties.method = "min"
+)
+
+
+##############################
+# 9. Merge comparison table
+##############################
+
+bridge_compare <- merge(
+  result4,
+  result2,
+  by = "Symptom"
+)
+
+bridge_compare <- bridge_compare %>%
+  arrange(Rank_4factor)
+
+
+##############################
+# 10. Add symptom labels
+##############################
+
+symptom_labels <- c(
+  "Pain",
+  "Fatigue",
+  "Nausea",
+  "Disturbed sleep",
+  "Distress",
+  "Shortness of breath",
+  "Forgetfulness",
+  "Lack of appetite",
+  "Drowsiness",
+  "Dry mouth",
+  "Sadness",
+  "Vomiting",
+  "Numbness or tingling",
+  "Mouth or throat mucus",
+  "Difficulty swallowing or chewing",
+  "Choking",
+  "Difficulty speaking",
+  "Skin pain",
+  "Constipation",
+  "Taste changes",
+  "Mouth or throat soreness",
+  "Teeth or gum problems"
+)
+
+label_key <- data.frame(
+  Symptom = symptom_vars,
+  Symptom_label = symptom_labels
+)
+
+bridge_compare <- left_join(
+  bridge_compare,
+  label_key,
+  by = "Symptom"
+)
+
+bridge_compare <- bridge_compare[
+  ,
+  c(
+    "Symptom",
+    "Symptom_label",
+    "Bridge_strength_4factor",
+    "Rank_4factor",
+    "Bridge_strength_2factor",
+    "Rank_2factor"
+  )
+]
+
+
+##############################
+# 11. Export supplementary table
+##############################
+
+write.xlsx(
+  bridge_compare,
+  file.path(
+    output_path,
+    "Supplementary_Bridge_strength_4factor_vs_2factor.xlsx"
+  ),
+  rowNames = FALSE
+)
+
+
+##############################
+# 12. Plot four-factor bridge strength
+##############################
+
+plot_data <- result4 %>%
+  arrange(Rank_4factor)
+
+plot_data$Symptom <- factor(
+  plot_data$Symptom,
+  levels = rev(plot_data$Symptom)
+)
+
+p_bridge4 <- ggplot(
+  plot_data,
+  aes(
+    x = Bridge_strength_4factor,
+    y = Symptom,
+    group = 1
+  )
+) +
+  geom_line() +
+  geom_point(size = 2.5) +
+  theme_bw() +
+  labs(
+    x = "Raw bridge strength",
+    y = NULL
+  )
+
+ggsave(
+  file.path(
+    output_path,
+    "Bridge_strength_4factor_sensitivity.png"
+  ),
+  p_bridge4,
+  width = 6,
+  height = 7,
+  dpi = 300
+)
+
+
+##############################
+# 13. Save analysis objects
+##############################
+
+save(
+  community4,
+  community2,
+  bridge4,
+  bridge2,
+  bridge_compare,
+  file = file.path(
+    output_path,
+    "Bridge_strength_sensitivity_objects.RData"
+  )
+)
+
+
+##############################
+# 14. Completion message
+##############################
+
+cat("\nBridge-strength sensitivity analysis completed successfully.\n")
+cat("Output directory:", output_path, "\n")
