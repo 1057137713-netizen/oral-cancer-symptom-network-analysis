@@ -1,5 +1,5 @@
 # oral-cancer-symptom-network-analysis
-Study-specific R scripts and reproducibility materials for symptom network analysis and simulation-based intervention analysis in patients with oral cancer.
+Study-specific R scripts and reproducibility materials for symptom network analysis and simulation-based perturbation analysis in patients with oral cancer.
 ## Reproducible analysis workflow
 
 This repository contains the study-specific R scripts used to reproduce the analyses reported in the manuscript.
@@ -49,7 +49,11 @@ data_dictionary.csv
 ```
 
 To support verification of the simulation workflow without access to the participant-level dataset, the repository also provides intermediate Ising-model parameter files, including the estimated edge-weight matrix and symptom-specific threshold parameters.
-##Symptom coding
+```text
+Scripts 08-10 automatically use these public intermediate parameter files when the locally fitted Ising-model object is unavailable. Therefore, the NIRA perturbation, repeated stability, and perturbation-magnitude sensitivity workflows can be verified without access to the participant-level dataset.
+```
+
+## Symptom coding
 The 22 MDASI-H&N symptom items are scored from 0 to 10.
 For the continuous Gaussian graphical network analyses, the original 0-10 symptom scores are used.
 For the binary Ising-model and simulation analyses, symptom scores are dichotomized as:
@@ -58,9 +62,9 @@ For the binary Ising-model and simulation analyses, symptom scores are dichotomi
 >0 = symptom present
 ```
 
-##Analysis workflow
+## Analysis workflow
 The scripts are intended to be run from the project root directory.
-###01. Data preparation
+### 01. Data preparation
 ```text
 scripts/01_data_preparation.R
 ```
@@ -116,8 +120,8 @@ EBIC tuning parameter gamma = 0.5
 The script also produces:
 
 - edge-weight matrix
-- centrality indices
-- bridge strength
+- raw strength centrality
+- raw bridge strength
 - nonparametric edge-weight bootstrap
 - case-dropping centrality stability analysis
 - correlation-stability (CS) coefficients
@@ -224,7 +228,7 @@ results/07_ising_validation/
 scripts/08_NIRA_primary_2SD.R
 ```
 
-Performs the primary simulation-based intervention analysis.
+Performs the primary simulation-based perturbation analysis.
 
 For each symptom, the target threshold is perturbed individually by:
 
@@ -233,7 +237,7 @@ For each symptom, the target threshold is perturbed individually by:
 +2 SD = aggravating simulation
 ```
 
-During each intervention simulation:
+During each modeled perturbation:
 
 - the Ising edge-weight matrix remains fixed
 - thresholds of all other symptoms remain unchanged
@@ -242,10 +246,10 @@ During each intervention simulation:
 
 The modeled outcome is the mean number of symptoms present.
 
-The intervention effect is defined as:
+The modeled perturbation effect is defined as:
 
 ```text
-Delta = intervention mean symptom count
+Delta = perturbed-condition mean symptom count
         - common baseline mean symptom count
 ```
 
@@ -264,7 +268,7 @@ scripts/09_NIRA_stability_1000rep.R
 
 Repeats the complete primary +/-2 SD simulation procedure 1,000 times.
 
-Within each repetition, one common simulated baseline is used for all 44 intervention comparisons.
+Within each repetition, one common simulated baseline is used for all 44 modeled perturbation comparisons.
 
 The stability analysis reports:
 
@@ -291,7 +295,7 @@ results/09_NIRA_stability/
 scripts/10_NIRA_sensitivity_analysis.R
 ```
 
-Evaluates whether the direction and overall ranking pattern of the simulated intervention effects remain similar across different threshold perturbation magnitudes.
+Evaluates whether the direction and overall ranking pattern of the simulated perturbation effects remain similar...
 
 Perturbation settings:
 
@@ -447,7 +451,7 @@ However, the repository provides:
 - full session information
 - estimated Ising edge-weight parameters
 - estimated Ising threshold parameters
-- simulation outputs and plotting data
+- scripts for generating simulation outputs and plotting data
 
 These materials allow the analytical workflow and the simulation procedures to be independently inspected and verified.
 
