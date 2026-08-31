@@ -69,7 +69,8 @@ if (!file.exists(input_file)) {
 ##############################
 
 data <- read_excel(
-  input_file
+  input_file,
+  sheet = "整理-ALL"
 )
 
 

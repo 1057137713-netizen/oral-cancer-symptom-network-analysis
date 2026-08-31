@@ -64,7 +64,10 @@ if (!file.exists(data_path)) {
   )
 }
 
-data <- read_excel(data_path)
+data <- read_excel(
+  data_path,
+  sheet = "整理-ALL"
+)
 
 symptom_vars <- paste0("Q", 1:22)
 
