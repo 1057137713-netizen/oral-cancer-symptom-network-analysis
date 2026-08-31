@@ -9,8 +9,8 @@
 # - EBICglasso regularized partial-correlation network
 # - Pearson correlations
 # - EBIC tuning parameter gamma = 0.5
-# - Centrality analysis
-# - Bridge strength based on the retained four-factor solution
+# - Raw strength centrality
+# - Raw bridge strength based on the retained four-factor solution
 # - Nonparametric edge bootstrap (1,000)
 # - Case-dropping centrality stability bootstrap (1,000)
 ############################################################
@@ -39,7 +39,10 @@ data_path <- "data/raw_data.xlsx"
 output_path <- "results/03_GGM_network_analysis"
 
 if (!dir.exists(output_path)) {
-  dir.create(output_path, recursive = TRUE)
+  dir.create(
+    output_path,
+    recursive = TRUE
+  )
 }
 
 
@@ -47,7 +50,10 @@ if (!dir.exists(output_path)) {
 # 3. Random seeds
 ##############################
 
+# Reproducibility seeds added for the revised workflow
+
 SEED_EDGE_BOOTSTRAP <- 20260831
+
 SEED_CENTRALITY_BOOTSTRAP <- 20260901
 
 
@@ -56,9 +62,11 @@ SEED_CENTRALITY_BOOTSTRAP <- 20260901
 ##############################
 
 if (!file.exists(data_path)) {
+  
   stop(
     paste0(
-      "Data file not found: ", data_path,
+      "Data file not found: ",
+      data_path,
       "\nParticipant-level data are not distributed publicly."
     )
   )
@@ -69,35 +77,73 @@ data <- read_excel(
   sheet = "整理-ALL"
 )
 
-symptom_vars <- paste0("Q", 1:22)
+symptom_vars <- paste0(
+  "Q",
+  1:22
+)
 
-if (!all(symptom_vars %in% names(data))) {
-  stop("One or more required symptom variables (Q1-Q22) are missing.")
+if (!all(
+  symptom_vars %in% names(data)
+)) {
+  
+  stop(
+    "One or more required symptom variables (Q1-Q22) are missing."
+  )
 }
 
-symptom_data <- data[, symptom_vars]
-symptom_data <- as.data.frame(symptom_data)
+symptom_data <- data[
+  ,
+  symptom_vars
+]
+
+symptom_data <- as.data.frame(
+  symptom_data
+)
 
 symptom_data[] <- lapply(
   symptom_data,
   as.numeric
 )
 
-if (any(is.na(symptom_data))) {
+if (any(
+  is.na(symptom_data)
+)) {
+  
   stop(
-    "Missing values were detected. The study dataset used for the reported analysis contained no missing symptom data."
+    paste0(
+      "Missing values were detected. ",
+      "The study dataset used for the reported analysis ",
+      "contained no missing symptom data."
+    )
   )
 }
 
+all_values <- unlist(
+  symptom_data,
+  use.names = FALSE
+)
+
 if (any(
-  unlist(symptom_data) < 0 |
-  unlist(symptom_data) > 10
+  all_values < 0 |
+  all_values > 10
 )) {
-  stop("Symptom scores outside the expected 0-10 range were detected.")
+  
+  stop(
+    "Symptom scores outside the expected 0-10 range were detected."
+  )
 }
 
-cat("Sample size:", nrow(symptom_data), "\n")
-cat("Number of symptoms:", ncol(symptom_data), "\n")
+cat(
+  "Sample size:",
+  nrow(symptom_data),
+  "\n"
+)
+
+cat(
+  "Number of symptoms:",
+  ncol(symptom_data),
+  "\n"
+)
 
 
 ##############################
@@ -111,11 +157,21 @@ network <- estimateNetwork(
   tuning = 0.5
 )
 
-adj_matrix <- as.matrix(network$graph)
-storage.mode(adj_matrix) <- "numeric"
+adj_matrix <- as.matrix(
+  network$graph
+)
 
-rownames(adj_matrix) <- symptom_vars
-colnames(adj_matrix) <- symptom_vars
+storage.mode(
+  adj_matrix
+) <- "numeric"
+
+rownames(
+  adj_matrix
+) <- symptom_vars
+
+colnames(
+  adj_matrix
+) <- symptom_vars
 
 
 ##############################
@@ -137,10 +193,40 @@ colnames(adj_matrix) <- symptom_vars
 # Q3, Q12
 
 groups_list <- list(
-  "Cluster 1" = c(15, 16),
-  "Cluster 2" = c(2, 4, 5, 6, 7, 9, 11, 19),
-  "Cluster 3" = c(1, 8, 10, 13, 14, 17, 18, 20, 21, 22),
-  "Cluster 4" = c(3, 12)
+  
+  "Cluster 1" = c(
+    15,
+    16
+  ),
+  
+  "Cluster 2" = c(
+    2,
+    4,
+    5,
+    6,
+    7,
+    9,
+    11,
+    19
+  ),
+  
+  "Cluster 3" = c(
+    1,
+    8,
+    10,
+    13,
+    14,
+    17,
+    18,
+    20,
+    21,
+    22
+  ),
+  
+  "Cluster 4" = c(
+    3,
+    12
+  )
 )
 
 communities <- c(
@@ -168,7 +254,9 @@ communities <- c(
   "Cluster3"  # Q22
 )
 
-names(communities) <- symptom_vars
+names(
+  communities
+) <- symptom_vars
 
 
 ##############################
@@ -225,10 +313,14 @@ edge_matrix <- round(
   3
 )
 
-diag(edge_matrix) <- 0
+diag(
+  edge_matrix
+) <- 0
 
 write.xlsx(
-  as.data.frame(edge_matrix),
+  as.data.frame(
+    edge_matrix
+  ),
   file.path(
     output_path,
     "Supplementary_GGM_edge_weight_matrix.xlsx"
@@ -253,14 +345,18 @@ for (i in 1:21) {
         Node1 = symptom_vars[i],
         Node2 = symptom_vars[j],
         Weight = adj_matrix[i, j],
-        Absolute_weight = abs(adj_matrix[i, j])
+        Absolute_weight = abs(
+          adj_matrix[i, j]
+        )
       )
     )
   }
 }
 
 edge_table <- edge_table[
-  order(-edge_table$Absolute_weight),
+  order(
+    -edge_table$Absolute_weight
+  ),
 ]
 
 write.xlsx(
@@ -274,11 +370,13 @@ write.xlsx(
 
 
 ##############################
-# 10. Centrality indices
+# 10. Raw centrality indices
 ##############################
 
 centrality_results <- qgraph::centralityTable(
-  network$graph
+  network$graph,
+  standardized = FALSE,
+  relative = FALSE
 )
 
 centrality_long <- centrality_results %>%
@@ -302,7 +400,9 @@ centrality_table <- centrality_long %>%
     values_from = value
   )
 
-colnames(centrality_table)[1] <- "Symptom"
+colnames(
+  centrality_table
+)[1] <- "Symptom"
 
 centrality_table$Strength_rank <- rank(
   -centrality_table$Strength,
@@ -323,87 +423,131 @@ write.xlsx(
   centrality_table,
   file.path(
     output_path,
-    "Centrality_results.xlsx"
+    "Centrality_results_RAW.xlsx"
   ),
   rowNames = FALSE
 )
 
 
 ##############################
-# 11. Centrality figure
+# 11. Raw strength table
 ##############################
 
-centrality_plot <- centrality_results %>%
-  filter(
-    measure %in%
-      c(
-        "Strength",
-        "Closeness",
-        "Betweenness"
-      )
-  ) %>%
+strength_table <- centrality_table %>%
   select(
-    node,
-    measure,
-    value
+    Symptom,
+    Strength,
+    Strength_rank
+  ) %>%
+  arrange(
+    Strength_rank
   )
 
-centrality_plot$measure <- factor(
-  centrality_plot$measure,
-  levels = c(
-    "Strength",
-    "Closeness",
-    "Betweenness"
+write.xlsx(
+  strength_table,
+  file.path(
+    output_path,
+    "Strength_RAW_ranked.xlsx"
+  ),
+  rowNames = FALSE
+)
+
+cat(
+  "\nRaw strength centrality:\n"
+)
+
+print(
+  strength_table
+)
+
+
+##############################
+# 12. Figure 4: raw strength only
+##############################
+
+strength_plot_data <- strength_table %>%
+  arrange(
+    Strength
   )
+
+strength_plot_data$Symptom <- factor(
+  strength_plot_data$Symptom,
+  levels = strength_plot_data$Symptom
 )
 
-strength_order <- centrality_plot %>%
-  filter(measure == "Strength") %>%
-  arrange(desc(value)) %>%
-  pull(node)
-
-centrality_plot$node <- factor(
-  centrality_plot$node,
-  levels = rev(strength_order)
-)
-
-p_centrality <- ggplot(
-  centrality_plot,
+p_strength <- ggplot(
+  strength_plot_data,
   aes(
-    x = value,
-    y = node
+    x = Strength,
+    y = Symptom,
+    group = 1
   )
 ) +
-  geom_point(size = 2.8) +
   geom_line(
-    aes(group = 1),
     linewidth = 0.8
   ) +
-  facet_wrap(
-    ~measure,
-    scales = "free_x",
-    nrow = 1
+  geom_point(
+    size = 2.8
   ) +
-  theme_bw() +
+  theme_bw(
+    base_size = 13
+  ) +
   labs(
-    x = "Raw centrality value",
+    title = "Strength",
+    x = "Raw strength value",
     y = NULL
+  ) +
+  theme(
+    plot.title = element_text(
+      hjust = 0.5,
+      face = "plain",
+      size = 15
+    ),
+    axis.text.y = element_text(
+      size = 11
+    ),
+    axis.text.x = element_text(
+      size = 11
+    ),
+    axis.title.x = element_text(
+      size = 13
+    ),
+    axis.title.y = element_blank(),
+    panel.grid.major = element_line(
+      color = "grey90"
+    ),
+    panel.grid.minor = element_blank(),
+    panel.border = element_rect(
+      fill = NA
+    )
   )
 
 ggsave(
   file.path(
     output_path,
-    "Figure4_Centrality_raw.png"
+    "Figure4_Strength_only.png"
   ),
-  p_centrality,
-  width = 12,
-  height = 6,
-  dpi = 300
+  p_strength,
+  width = 5.5,
+  height = 7.5,
+  dpi = 600
+)
+
+ggsave(
+  file.path(
+    output_path,
+    "Figure4_Strength_only.tiff"
+  ),
+  p_strength,
+  width = 5.5,
+  height = 7.5,
+  dpi = 600,
+  compression = "lzw"
 )
 
 
 ##############################
-# 12. Bridge strength
+# 13. Raw bridge strength
 ##############################
 
 bridge_result <- networktools::bridge(
@@ -412,9 +556,11 @@ bridge_result <- networktools::bridge(
 )
 
 bridge_table <- data.frame(
+  
   Symptom = names(
     bridge_result$`Bridge Strength`
   ),
+  
   Bridge_strength = as.numeric(
     bridge_result$`Bridge Strength`
   )
@@ -422,25 +568,37 @@ bridge_table <- data.frame(
 
 bridge_table <- bridge_table %>%
   arrange(
-    desc(Bridge_strength)
+    desc(
+      Bridge_strength
+    )
   )
 
 bridge_table$Rank <- seq_len(
-  nrow(bridge_table)
+  nrow(
+    bridge_table
+  )
 )
 
 write.xlsx(
   bridge_table,
   file.path(
     output_path,
-    "Bridge_strength_results.xlsx"
+    "Bridge_strength_RAW.xlsx"
   ),
   rowNames = FALSE
 )
 
+cat(
+  "\nRaw bridge strength:\n"
+)
+
+print(
+  bridge_table
+)
+
 
 ##############################
-# 13. Bridge strength figure
+# 14. Figure 5: raw bridge strength
 ##############################
 
 p_bridge <- ggplot(
@@ -453,21 +611,25 @@ p_bridge <- ggplot(
     y = Bridge_strength
   )
 ) +
-  geom_point(size = 3) +
+  geom_point(
+    size = 3
+  ) +
   geom_line(
-    aes(group = 1)
+    aes(
+      group = 1
+    )
   ) +
   coord_flip() +
   theme_bw() +
   labs(
     x = NULL,
-    y = "Bridge strength"
+    y = "Raw bridge strength"
   )
 
 ggsave(
   file.path(
     output_path,
-    "Figure5_Bridge_strength.png"
+    "Figure5_Bridge_strength_RAW.png"
   ),
   p_bridge,
   width = 5,
@@ -477,10 +639,12 @@ ggsave(
 
 
 ##############################
-# 14. Edge-weight accuracy bootstrap
+# 15. Edge-weight accuracy bootstrap
 ##############################
 
-set.seed(SEED_EDGE_BOOTSTRAP)
+set.seed(
+  SEED_EDGE_BOOTSTRAP
+)
 
 boot_edges <- bootnet(
   network,
@@ -514,10 +678,16 @@ dev.off()
 
 
 ##############################
-# 15. Centrality stability bootstrap
+# 16. Centrality stability bootstrap
 ##############################
 
-set.seed(SEED_CENTRALITY_BOOTSTRAP)
+# Strength, closeness, and betweenness are retained here
+# for centrality-stability assessment, although Figure 4
+# displays only raw strength centrality.
+
+set.seed(
+  SEED_CENTRALITY_BOOTSTRAP
+)
 
 boot_centrality <- bootnet(
   network,
@@ -553,7 +723,7 @@ dev.off()
 
 
 ##############################
-# 16. CS coefficient
+# 17. CS coefficient
 ##############################
 
 CS_result <- corStability(
@@ -567,20 +737,32 @@ sink(
   )
 )
 
-print(CS_result)
+print(
+  CS_result
+)
 
 sink()
 
+cat(
+  "\nCS coefficients:\n"
+)
+
+print(
+  CS_result
+)
+
 
 ##############################
-# 17. Save random seeds
+# 18. Save random seeds
 ##############################
 
 seed_info <- c(
+  
   paste0(
     "Edge bootstrap seed: ",
     SEED_EDGE_BOOTSTRAP
   ),
+  
   paste0(
     "Centrality bootstrap seed: ",
     SEED_CENTRALITY_BOOTSTRAP
@@ -597,7 +779,7 @@ writeLines(
 
 
 ##############################
-# 18. Save analysis objects
+# 19. Save analysis objects
 ##############################
 
 save(
@@ -607,6 +789,7 @@ save(
   edge_table,
   centrality_results,
   centrality_table,
+  strength_table,
   bridge_result,
   bridge_table,
   boot_edges,
@@ -620,8 +803,15 @@ save(
 
 
 ##############################
-# 19. Completion message
+# 20. Completion message
 ##############################
 
-cat("\nGGM network analysis completed successfully.\n")
-cat("Output directory:", output_path, "\n")
+cat(
+  "\nGGM network analysis completed successfully.\n"
+)
+
+cat(
+  "Output directory:",
+  output_path,
+  "\n"
+)

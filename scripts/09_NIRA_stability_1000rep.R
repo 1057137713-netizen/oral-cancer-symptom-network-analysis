@@ -4,8 +4,8 @@
 # Repeated stability analysis of the primary ±2 SD NIRA
 #
 # Purpose:
-# Evaluate simulation stability of symptom-level intervention
-# effects and rankings across 1,000 complete repetitions.
+# Evaluate simulation stability of symptom-level modeled
+# perturbation effects and rankings across 1,000 complete repetitions.
 #
 # Key principles:
 # 1. Original Ising edge-weight matrix remains fixed.
@@ -17,8 +17,12 @@
 # 6. Each condition contains 5,000 binary profiles.
 # 7. No post-intervention network is re-estimated.
 #
-# Input:
-#   results/06_Ising_model/ising_model.rds
+#  Input:
+#   Preferred local input:
+#     results/06_Ising_model/ising_model.rds
+#   Public fallback inputs:
+#     intermediate_parameters/ising_edge_weight_matrix.csv
+#     intermediate_parameters/ising_threshold_parameters.csv
 #
 # Output:
 #   results/09_NIRA_stability/
@@ -43,20 +47,20 @@ model_file <- file.path(
   "ising_model.rds"
 )
 
+edge_file <- file.path(
+  "intermediate_parameters",
+  "ising_edge_weight_matrix.csv"
+)
+
+threshold_file <- file.path(
+  "intermediate_parameters",
+  "ising_threshold_parameters.csv"
+)
+
 output_dir <- file.path(
   "results",
   "09_NIRA_stability"
 )
-
-if (!file.exists(model_file)) {
-  stop(
-    paste0(
-      "Input Ising model not found: ",
-      model_file,
-      "\nPlease run scripts/06_estimate_ising_model.R first."
-    )
-  )
-}
 
 if (!dir.exists(output_dir)) {
   dir.create(
@@ -67,20 +71,65 @@ if (!dir.exists(output_dir)) {
 
 
 ##############################
-# 3. Load original Ising model
+# 3. Load fixed Ising parameters
 ##############################
 
-ising_model <- readRDS(
-  model_file
-)
+# If the locally fitted Ising model is available, use it.
+# Otherwise, use the public intermediate parameter files
+# distributed with the repository.
 
-edge_weights <- as.matrix(
-  ising_model$weiadj
-)
-
-thresholds <- as.numeric(
-  ising_model$thresholds
-)
+if (file.exists(model_file)) {
+  
+  ising_model <- readRDS(
+    model_file
+  )
+  
+  edge_weights <- as.matrix(
+    ising_model$weiadj
+  )
+  
+  thresholds <- as.numeric(
+    ising_model$thresholds
+  )
+  
+  cat(
+    "Using locally fitted Ising model.\n"
+  )
+  
+} else {
+  
+  if (!file.exists(edge_file) ||
+      !file.exists(threshold_file)) {
+    
+    stop(
+      paste0(
+        "Neither the local fitted Ising model nor the ",
+        "public intermediate parameter files were found."
+      )
+    )
+  }
+  
+  edge_weights <- as.matrix(
+    read.csv(
+      edge_file,
+      row.names = 1,
+      check.names = FALSE
+    )
+  )
+  
+  threshold_data <- read.csv(
+    threshold_file,
+    check.names = FALSE
+  )
+  
+  thresholds <- as.numeric(
+    threshold_data[[ncol(threshold_data)]]
+  )
+  
+  cat(
+    "Using public intermediate Ising parameter files.\n"
+  )
+}
 
 symptom_codes <- paste0(
   "Q",

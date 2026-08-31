@@ -126,8 +126,7 @@ cat(
 # 5. Estimate Ising model
 ##############################
 
-# Prespecified seed retained for reproducibility
-
+# Seed retained from the original analysis for reproducibility
 SEED_ISING <- 2026
 
 set.seed(

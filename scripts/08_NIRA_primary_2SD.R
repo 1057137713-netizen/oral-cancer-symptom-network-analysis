@@ -11,8 +11,12 @@
 # 5. No post-intervention networks are re-estimated.
 # 6. A common simulated baseline is used for all interventions.
 #
-# Input:
-#   results/06_Ising_model/ising_model.rds
+#  Input:
+#   Preferred local input:
+#     results/06_Ising_model/ising_model.rds
+#   Public fallback inputs:
+#     intermediate_parameters/ising_edge_weight_matrix.csv
+#     intermediate_parameters/ising_threshold_parameters.csv
 #
 # Output:
 #   results/08_NIRA_primary_2SD/
@@ -36,6 +40,16 @@ model_file <- file.path(
   "ising_model.rds"
 )
 
+edge_file <- file.path(
+  "intermediate_parameters",
+  "ising_edge_weight_matrix.csv"
+)
+
+threshold_file <- file.path(
+  "intermediate_parameters",
+  "ising_threshold_parameters.csv"
+)
+
 output_dir <- file.path(
   "results",
   "08_NIRA_primary_2SD"
@@ -50,35 +64,70 @@ if (!dir.exists(output_dir)) {
 
 
 ##############################
-# 3. Load Ising model
+# 3. Load fixed Ising parameters
 ##############################
 
-if (!file.exists(model_file)) {
-  stop(
-    paste0(
-      "Input file not found: ",
-      model_file,
-      "\nPlease run scripts/06_estimate_ising_model.R first."
+# If the locally fitted Ising model is available, use it.
+# Otherwise, use the public intermediate parameter files
+# distributed with the repository.
+
+if (file.exists(model_file)) {
+  
+  ising_model <- readRDS(
+    model_file
+  )
+  
+  edge_weights <- as.matrix(
+    ising_model$weiadj
+  )
+  
+  thresholds <- as.numeric(
+    ising_model$thresholds
+  )
+  
+  cat(
+    "Using locally fitted Ising model.\n"
+  )
+  
+} else {
+  
+  if (!file.exists(edge_file) ||
+      !file.exists(threshold_file)) {
+    
+    stop(
+      paste0(
+        "Neither the local fitted Ising model nor the ",
+        "public intermediate parameter files were found."
+      )
     )
+  }
+  
+  edge_weights <- as.matrix(
+    read.csv(
+      edge_file,
+      row.names = 1,
+      check.names = FALSE
+    )
+  )
+  
+  threshold_data <- read.csv(
+    threshold_file,
+    check.names = FALSE
+  )
+  
+  thresholds <- as.numeric(
+    threshold_data[[ncol(threshold_data)]]
+  )
+  
+  cat(
+    "Using public intermediate Ising parameter files.\n"
   )
 }
 
-ising_model <- readRDS(
-  model_file
-)
-
 
 ##############################
-# 4. Extract fixed Ising parameters
+# 4. Define parameter names
 ##############################
-
-edge_weights <- as.matrix(
-  ising_model$weiadj
-)
-
-thresholds <- as.numeric(
-  ising_model$thresholds
-)
 
 symptom_codes <- paste0(
   "Q",
@@ -88,6 +137,7 @@ symptom_codes <- paste0(
 rownames(edge_weights) <- symptom_codes
 colnames(edge_weights) <- symptom_codes
 names(thresholds) <- symptom_codes
+
 
 
 ##############################
@@ -116,6 +166,8 @@ stopifnot(
 ##############################
 # 6. Define primary perturbation
 ##############################
+# Threshold perturbations represent modeled changes in the
+# activation propensity of the target symptom.
 
 threshold_sd <- sd(
   thresholds

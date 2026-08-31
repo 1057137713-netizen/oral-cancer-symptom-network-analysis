@@ -597,7 +597,7 @@ plot_subgroup_pair(
 ##############################
 # 16. NCT settings
 ##############################
-
+# Reproducibility seed retained for the revised subgroup workflow
 NCT_SEED <- 1234
 NCT_PERMUTATIONS <- 1000
 
@@ -617,8 +617,7 @@ sex_NCT <- NetworkComparisonTest::NCT(
   it = NCT_PERMUTATIONS,
   binary.data = FALSE,
   paired = FALSE,
-  test.edges = TRUE,
-  edges = "all",
+  test.edges = FALSE,
   progressbar = TRUE
 )
 
@@ -638,8 +637,7 @@ site_NCT <- NetworkComparisonTest::NCT(
   it = NCT_PERMUTATIONS,
   binary.data = FALSE,
   paired = FALSE,
-  test.edges = TRUE,
-  edges = "all",
+  test.edges = FALSE,
   progressbar = TRUE
 )
 
@@ -659,8 +657,7 @@ treatment_NCT <- NetworkComparisonTest::NCT(
   it = NCT_PERMUTATIONS,
   binary.data = FALSE,
   paired = FALSE,
-  test.edges = TRUE,
-  edges = "all",
+  test.edges = FALSE,
   progressbar = TRUE
 )
 

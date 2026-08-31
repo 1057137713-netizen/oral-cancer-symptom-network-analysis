@@ -48,7 +48,7 @@ if (!dir.exists(output_path)) {
 # 3. Random seed
 ##############################
 
-# Prespecified seed for parallel analysis
+# Reproducibility seed added for the revised workflow
 SEED_PARALLEL <- 20260830
 set.seed(SEED_PARALLEL)
 

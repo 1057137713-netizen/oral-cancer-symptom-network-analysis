@@ -46,6 +46,7 @@ analysis_packages <- c(
   "ggplot2",
   "IsingFit",
   "IsingSampler",
+  "nodeIdentifyR",
   "parallel",
   "patchwork",
   "NetworkComparisonTest"

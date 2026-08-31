@@ -17,10 +17,15 @@
 # 4. Compare effect directions and mean symptom rankings
 #    across perturbation magnitudes.
 #
-# Inputs:
-#   results/06_Ising_model/ising_model.rds
-#   results/09_NIRA_stability/NIRA_stability_all_repetitions.csv
-#   results/09_NIRA_stability/NIRA_repetition_seeds.csv
+#  Inputs:
+#   Preferred local Ising input:
+#     results/06_Ising_model/ising_model.rds
+#   Public fallback Ising inputs:
+#     intermediate_parameters/ising_edge_weight_matrix.csv
+#     intermediate_parameters/ising_threshold_parameters.csv
+#   Required stability inputs:
+#     results/09_NIRA_stability/NIRA_stability_all_repetitions.csv
+#     results/09_NIRA_stability/NIRA_repetition_seeds.csv
 #
 # Output:
 #   results/10_NIRA_sensitivity/
@@ -45,6 +50,16 @@ model_file <- file.path(
   "ising_model.rds"
 )
 
+edge_file <- file.path(
+  "intermediate_parameters",
+  "ising_edge_weight_matrix.csv"
+)
+
+threshold_file <- file.path(
+  "intermediate_parameters",
+  "ising_threshold_parameters.csv"
+)
+
 stability_2SD_file <- file.path(
   "results",
   "09_NIRA_stability",
@@ -62,23 +77,27 @@ output_dir <- file.path(
   "10_NIRA_sensitivity"
 )
 
+
+# The completed ±2 SD stability results and exact
+# repetition seeds are required.
+
 required_files <- c(
-  model_file,
   stability_2SD_file,
   seed_file
 )
 
 if (!all(file.exists(required_files))) {
+  
   stop(
     paste0(
-      "One or more required input files are missing.\n",
-      "Please run scripts/06_estimate_ising_model.R and ",
-      "scripts/09_NIRA_stability_1000rep.R first."
+      "Required stability-analysis files are missing.\n",
+      "Please run scripts/09_NIRA_stability_1000rep.R first."
     )
   )
 }
 
 if (!dir.exists(output_dir)) {
+  
   dir.create(
     output_dir,
     recursive = TRUE
@@ -87,20 +106,65 @@ if (!dir.exists(output_dir)) {
 
 
 ##############################
-# 3. Load Ising model
+# 3. Load fixed Ising parameters
 ##############################
 
-ising_model <- readRDS(
-  model_file
-)
+# If the locally fitted Ising model is available, use it.
+# Otherwise, use the public intermediate parameter files
+# distributed with the repository.
 
-edge_weights <- as.matrix(
-  ising_model$weiadj
-)
-
-thresholds <- as.numeric(
-  ising_model$thresholds
-)
+if (file.exists(model_file)) {
+  
+  ising_model <- readRDS(
+    model_file
+  )
+  
+  edge_weights <- as.matrix(
+    ising_model$weiadj
+  )
+  
+  thresholds <- as.numeric(
+    ising_model$thresholds
+  )
+  
+  cat(
+    "Using locally fitted Ising model.\n"
+  )
+  
+} else {
+  
+  if (!file.exists(edge_file) ||
+      !file.exists(threshold_file)) {
+    
+    stop(
+      paste0(
+        "Neither the local fitted Ising model nor the ",
+        "public intermediate parameter files were found."
+      )
+    )
+  }
+  
+  edge_weights <- as.matrix(
+    read.csv(
+      edge_file,
+      row.names = 1,
+      check.names = FALSE
+    )
+  )
+  
+  threshold_data <- read.csv(
+    threshold_file,
+    check.names = FALSE
+  )
+  
+  thresholds <- as.numeric(
+    threshold_data[[ncol(threshold_data)]]
+  )
+  
+  cat(
+    "Using public intermediate Ising parameter files.\n"
+  )
+}
 
 symptom_codes <- paste0(
   "Q",
@@ -654,6 +718,14 @@ baseline_2SD <-
   )
 
 stopifnot(
+  identical(
+    baseline_1SD$Repetition,
+    baseline_1_5SD$Repetition
+  ),
+  identical(
+    baseline_1SD$Repetition,
+    baseline_2SD$Repetition
+  ),
   isTRUE(
     all.equal(
       baseline_1SD$Baseline_Mean,

@@ -1,7 +1,8 @@
 ############################################################
 # 07_validate_ising_model.R
 #
-# Evaluate the binary Ising model
+# Evaluate reproduction of marginal symptom activation probabilities
+# by the estimated binary Ising model
 #
 # Method:
 # - Compare observed symptom activation probabilities
