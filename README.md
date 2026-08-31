@@ -49,9 +49,9 @@ data_dictionary.csv
 ```
 
 To support verification of the simulation workflow without access to the participant-level dataset, the repository also provides intermediate Ising-model parameter files, including the estimated edge-weight matrix and symptom-specific threshold parameters.
-```text
+
 Scripts 08-10 automatically use these public intermediate parameter files when the locally fitted Ising-model object is unavailable. Therefore, the NIRA perturbation, repeated stability, and perturbation-magnitude sensitivity workflows can be verified without access to the participant-level dataset.
-```
+- the network is not re-estimated after threshold perturbation
 
 ## Symptom coding
 The 22 MDASI-H&N symptom items are scored from 0 to 10.
@@ -222,7 +222,7 @@ results/07_ising_validation/
 ```
 
 
-### 08. Primary +/-2 SD NIRA simulation
+### 08. Primary ±2 SD NIRA simulation
 
 ```text
 scripts/08_NIRA_primary_2SD.R
@@ -266,7 +266,7 @@ results/08_NIRA_primary_2SD/
 scripts/09_NIRA_stability_1000rep.R
 ```
 
-Repeats the complete primary +/-2 SD simulation procedure 1,000 times.
+Repeats the complete primary ±2 SD simulation procedure 1,000 times.
 
 Within each repetition, one common simulated baseline is used for all 44 modeled perturbation comparisons.
 
@@ -300,9 +300,9 @@ Evaluates whether the direction and overall ranking pattern of the simulated per
 Perturbation settings:
 
 ```text
-+/-1 SD
-+/-1.5 SD
-+/-2 SD
+±1 SD
+±1.5 SD
+±2 SD
 ```
 
 The same repetition-specific seeds are used across perturbation magnitudes.
@@ -326,7 +326,7 @@ results/10_NIRA_sensitivity/
 scripts/11_generate_figure7.R
 ```
 
-Generates the final Figure 7 using the 1,000-repetition primary +/-2 SD stability results.
+Generates the final Figure 7 using the 1,000-repetition primary ±2 SD stability results.
 
 In Figure 7:
 
