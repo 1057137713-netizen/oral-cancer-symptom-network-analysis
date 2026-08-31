@@ -448,6 +448,7 @@ However, the repository provides:
 - estimated Ising edge-weight parameters
 - estimated Ising threshold parameters
 - simulation outputs and plotting data
+
 These materials allow the analytical workflow and the simulation procedures to be independently inspected and verified.
 
 
