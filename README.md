@@ -51,7 +51,7 @@ data_dictionary.csv
 To support verification of the simulation workflow without access to the participant-level dataset, the repository also provides intermediate Ising-model parameter files, including the estimated edge-weight matrix and symptom-specific threshold parameters.
 
 Scripts 08-10 automatically use these public intermediate parameter files when the locally fitted Ising-model object is unavailable. Therefore, the NIRA perturbation, repeated stability, and perturbation-magnitude sensitivity workflows can be verified without access to the participant-level dataset.
-- the network is not re-estimated after threshold perturbation
+
 
 ## Symptom coding
 The 22 MDASI-H&N symptom items are scored from 0 to 10.
@@ -241,7 +241,7 @@ During each modeled perturbation:
 
 - the Ising edge-weight matrix remains fixed
 - thresholds of all other symptoms remain unchanged
-- no post-intervention network is re-estimated
+- the network is not re-estimated after threshold perturbation
 - 5,000 binary symptom profiles are generated
 
 The modeled outcome is the mean number of symptoms present.
@@ -295,7 +295,7 @@ results/09_NIRA_stability/
 scripts/10_NIRA_sensitivity_analysis.R
 ```
 
-Evaluates whether the direction and overall ranking pattern of the simulated perturbation effects remain similar...
+Evaluates whether the direction and overall ranking pattern of the simulated perturbation effects remain similar across different threshold perturbation magnitudes.
 
 Perturbation settings:
 
