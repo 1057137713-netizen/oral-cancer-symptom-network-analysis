@@ -429,11 +429,11 @@ For the repeated NIRA analyses, repetition-specific seeds are additionally expor
 ## Software environment
 R and package versions used for the final analyses are recorded in:
 ```text
-results/12_session_info/sessionInfo.txt
+session_info/sessionInfo.txt
 ```
 and
 ```text
-results/12_session_info/package_versions.csv
+session_info/package_versions.csv
 ```
 
 
