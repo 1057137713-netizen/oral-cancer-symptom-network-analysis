@@ -25,3 +25,9 @@ Thumbs.db
 # Local backups
 *.bak
 *.backup
+# Participant-level derived data
+results/01_data_preparation/continuous_symptoms.csv
+results/05_binary_data/binary_symptoms.csv
+
+# R serialized objects
+*.rds
